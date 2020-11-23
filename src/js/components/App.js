@@ -1,5 +1,5 @@
 import { Scene, PerspectiveCamera, WebGLRenderer } from "three";
-import OrbitControls from "orbit-controls-es6";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import CustomPlane from "./CustomPlane";
 
 class App {
