@@ -1,6 +1,7 @@
 import { Scene, PerspectiveCamera, WebGLRenderer } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import CustomPlane from "./CustomPlane";
+import Tweakpane from "tweakpane";
+import DistortionPlane from "./DistortionPlane";
 
 class App {
   constructor() {
@@ -9,6 +10,7 @@ class App {
     this.onResize = this.onResize.bind(this);
     this.render = this.render.bind(this);
 
+    this.gui = new Tweakpane();
     this.initScene();
     this.initRenderer();
     this.initCamera();
@@ -44,6 +46,7 @@ class App {
 
   onResize() {
     this.setRendererSize();
+    this.distortionPlane.onResize();
   }
 
   setRendererSize() {
@@ -53,14 +56,15 @@ class App {
   }
 
   addObjects() {
-    this.customPlane = new CustomPlane();
-    this.scene.add(this.customPlane.mesh);
+    this.distortionPlane = new DistortionPlane({
+      camera: this.camera,
+      gui: this.gui,
+    });
+    this.scene.add(this.distortionPlane);
   }
 
   render() {
     requestAnimationFrame(this.render);
-
-    this.customPlane.mesh.material.uniforms.u_time.value++;
 
     this.renderer.render(this.scene, this.camera);
   }
