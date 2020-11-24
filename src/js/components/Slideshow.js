@@ -42,12 +42,16 @@ const SLIDES_PARAMS = [
 const SLIDE_SPACING = 12.5;
 
 class Slideshow extends Object3D {
-  constructor() {
-    super();
+  constructor(options) {
+    super(options);
 
+    this.viewportWidth = options.viewportWidth;
+    this.viewportHeight = options.viewportHeight;
     this.slides = [];
     this.scrollMin = 0;
     this.scrollMax = 0;
+    this.hasTransitionRunning = false;
+    this.activeSlide = null;
 
     this.initSlides();
     this.setScrollMinMax();
@@ -60,6 +64,8 @@ class Slideshow extends Object3D {
         width,
         height,
         y,
+        viewportWidth: this.viewportWidth,
+        viewportHeight: this.viewportHeight,
       });
 
       slide.position.set(xOff + width / 2, y, 0);
@@ -81,7 +87,30 @@ class Slideshow extends Object3D {
   }
 
   onScroll(e) {
-    this.position.x = clamp(e.y, this.scrollMin, this.scrollMax);
+    // Prevent scroll if slide is opened
+    if (!this.activeSlide) {
+      this.position.x = clamp(e.y, this.scrollMin, this.scrollMax);
+    }
+  }
+
+  open(mesh) {
+    if (!this.hasTransitionRunning) {
+      this.hasTransitionRunning = true;
+      this.activeSlide = mesh.parent;
+      this.activeSlide.open().then(() => {
+        this.hasTransitionRunning = false;
+      });
+    }
+  }
+
+  close() {
+    if (!this.hasTransitionRunning && this.activeSlide) {
+      this.hasTransitionRunning = true;
+      this.activeSlide.close().then(() => {
+        this.hasTransitionRunning = false;
+        this.activeSlide = null;
+      });
+    }
   }
 }
 

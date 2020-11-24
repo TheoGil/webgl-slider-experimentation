@@ -6,7 +6,6 @@ import {
   Vector2,
   Raycaster,
 } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
 import Tweakpane from "tweakpane";
 import DistortionPlane from "./DistortionPlane";
@@ -30,6 +29,8 @@ class App {
      * Create stuff
      */
     this.init();
+    this.setViewportDimensions();
+    this.addObjects();
     this.setRendererSize();
     this.setCameraAspect();
 
@@ -72,32 +73,6 @@ class App {
     );
     this.camera.position.z = 100;
 
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    // this.controls.enableZoom = false;
-
-    /*
-    this.distortionPlane = new DistortionPlane({
-      camera: this.camera,
-      gui: this.gui,
-    });
-    this.scene.add(this.distortionPlane);
-    */
-
-    /**
-     * Slideshow
-     */
-    this.slideshow = new Slideshow();
-    this.scene.add(this.slideshow);
-
-    /**
-     * Optional debug stuff
-     */
-    if (DEBUG) {
-      const helper = new GridHelper(200, 20);
-      helper.rotation.x = 1.5708;
-      // this.scene.add(helper);
-    }
-
     /**
      * GUI
      */
@@ -117,6 +92,34 @@ class App {
     this.intersects = [];
   }
 
+  addObjects() {
+    /*
+    this.distortionPlane = new DistortionPlane({
+      camera: this.camera,
+      gui: this.gui,
+    });
+    this.scene.add(this.distortionPlane);
+    */
+
+    /**
+     * Slideshow
+     */
+    this.slideshow = new Slideshow({
+      viewportWidth: this.width,
+      viewportHeight: this.height,
+    });
+    this.scene.add(this.slideshow);
+
+    /**
+     * Optional debug stuff
+     */
+    if (DEBUG) {
+      const helper = new GridHelper(200, 20);
+      helper.rotation.x = 1.5708;
+      // this.scene.add(helper);
+    }
+  }
+
   setRendererSize() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
@@ -126,6 +129,14 @@ class App {
     this.camera.updateProjectionMatrix();
   }
 
+  setViewportDimensions() {
+    const distance = this.camera.position.z;
+    const aspect = window.innerWidth / window.innerHeight;
+    const fovInRadians = (this.camera.fov * Math.PI) / 180;
+    this.height = 2 * Math.tan(fovInRadians / 2) * distance;
+    this.width = this.height * aspect;
+  }
+
   onResize() {
     this.setRendererSize();
     this.setCameraAspect();
@@ -133,15 +144,28 @@ class App {
   }
 
   onMouseDown(e) {
-    this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    if (this.slideshow.activeSlide) {
+      // If a slide is already opened and no transition is running, close active slide, no matter where user clicks
+      this.slideshow.close();
+    } else {
+      // If no slide is open (default state) AND no transition is running, check if mouse is intersecting a slide during click
+      if (!this.slideshow.hasTransitionRunning) {
+        this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    this.intersects.length = 0;
-    this.raycaster.intersectObjects(this.scene.children, true, this.intersects);
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        this.intersects.length = 0;
+        this.raycaster.intersectObjects(
+          this.slideshow.children,
+          true,
+          this.intersects
+        );
 
-    if (this.intersects.length > 0) {
-      console.log(this.intersects);
+        // If a slide is clicked, open it
+        if (this.intersects.length > 0) {
+          this.slideshow.open(this.intersects[0].object);
+        }
+      }
     }
   }
 
