@@ -53,7 +53,7 @@ class Slide extends Object3D {
     );
 
     const material = new MeshBasicMaterial({
-      wireframe: true,
+      wireframe: false,
       color: 0x000000,
     });
 

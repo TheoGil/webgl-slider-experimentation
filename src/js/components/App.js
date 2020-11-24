@@ -1,4 +1,11 @@
-import { Scene, PerspectiveCamera, WebGLRenderer, GridHelper } from "three";
+import {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  GridHelper,
+  Vector2,
+  Raycaster,
+} from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
 import Tweakpane from "tweakpane";
@@ -11,15 +18,30 @@ class App {
   constructor() {
     console.clear();
 
+    /**
+     * Context binding
+     */
     this.onResize = this.onResize.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
     this.render = this.render.bind(this);
+    // Note: virtual-scroll takes care of the context binding for the scroll events
 
+    /**
+     * Create stuff
+     */
     this.init();
     this.setRendererSize();
     this.setCameraAspect();
 
-    window.addEventListener("resize", this.onResize);
+    /**
+     * Attach events listeners
+     */
+    window.addEventListener("resize", this.onResize, false);
+    window.addEventListener("mousedown", this.onMouseDown, false);
 
+    /**
+     * Let's go
+     */
     this.render();
   }
 
@@ -36,6 +58,7 @@ class App {
       canvas: document.getElementById("js-canvas"),
       antialias: true,
     });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setClearColor(0xffffff);
 
     /**
@@ -49,8 +72,8 @@ class App {
     );
     this.camera.position.z = 100;
 
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableZoom = false;
+    // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    // this.controls.enableZoom = false;
 
     /*
     this.distortionPlane = new DistortionPlane({
@@ -72,7 +95,7 @@ class App {
     if (DEBUG) {
       const helper = new GridHelper(200, 20);
       helper.rotation.x = 1.5708;
-      this.scene.add(helper);
+      // this.scene.add(helper);
     }
 
     /**
@@ -85,6 +108,13 @@ class App {
      */
     this.vs = new VirtualScroll();
     this.vs.on(this.onScroll, this);
+
+    /**
+     * Mouse interaction
+     */
+    this.mouse = new Vector2();
+    this.raycaster = new Raycaster();
+    this.intersects = [];
   }
 
   setRendererSize() {
@@ -100,6 +130,19 @@ class App {
     this.setRendererSize();
     this.setCameraAspect();
     // this.distortionPlane.onResize();
+  }
+
+  onMouseDown(e) {
+    this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.intersects.length = 0;
+    this.raycaster.intersectObjects(this.scene.children, true, this.intersects);
+
+    if (this.intersects.length > 0) {
+      console.log(this.intersects);
+    }
   }
 
   onScroll(e) {
