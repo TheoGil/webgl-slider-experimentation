@@ -1,47 +1,55 @@
-import { Object3D } from "three";
+import { Object3D, TextureLoader } from "three";
 import gsap from "gsap";
 import Slide from "./Slide";
 import clamp from "../helpers/clamp";
+import slideSrc1 from "../../img/portrait1.jpg";
 
 const SLIDES_PARAMS = [
   {
     width: 25,
     height: 40,
     y: 0,
+    src: slideSrc1,
   },
   {
     width: 15,
     height: 15,
     y: 7,
+    src: slideSrc1,
   },
   {
     width: 32,
     height: 51,
     y: 0,
+    src: slideSrc1,
   },
   {
     width: 32,
     height: 32,
     y: 0,
+    src: slideSrc1,
   },
   {
     width: 32,
     height: 51,
     y: 0,
+    src: slideSrc1,
   },
   {
     width: 32,
     height: 32,
     y: -16,
+    src: slideSrc1,
   },
   {
     width: 25,
     height: 40,
     y: 0,
+    src: slideSrc1,
   },
 ];
 const SLIDE_SPACING = 12.5;
-const DEBUG = true;
+const DEBUG = false;
 const PARAMS = {
   distortion: 0,
 };
@@ -69,11 +77,16 @@ class Slideshow extends Object3D {
 
   initSlides() {
     let xOff = 0;
-    SLIDES_PARAMS.forEach(({ width, height, y }) => {
+
+    const textureLoader = new TextureLoader();
+
+    SLIDES_PARAMS.forEach(({ width, height, y, src }) => {
       const slide = new Slide({
         width,
         height,
         y,
+        src,
+        textureLoader,
         viewportWidth: this.viewportWidth,
         viewportHeight: this.viewportHeight,
       });
