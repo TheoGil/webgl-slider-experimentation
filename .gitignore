@@ -2,6 +2,7 @@
 coverage/
 dist/*
 node_modules/
+reference/
 *.log
 
 # OS generated files
