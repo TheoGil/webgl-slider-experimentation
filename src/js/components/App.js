@@ -5,6 +5,8 @@ import Tweakpane from "tweakpane";
 import DistortionPlane from "./DistortionPlane";
 import Slideshow from "./Slideshow";
 
+const DEBUG = true;
+
 class App {
   constructor() {
     console.clear();
@@ -12,29 +14,33 @@ class App {
     this.onResize = this.onResize.bind(this);
     this.render = this.render.bind(this);
 
-    this.gui = new Tweakpane();
-
-    this.vs = new VirtualScroll();
-    this.vs.on(this.onScroll, this);
-
-    this.initScene();
-    this.initRenderer();
-    this.initCamera();
+    this.init();
     this.setRendererSize();
-    this.addObjects();
+    this.setCameraAspect();
 
-    const helper = new GridHelper(200, 20);
-    helper.rotation.x = 1.5708;
-    this.scene.add(helper);
+    window.addEventListener("resize", this.onResize);
 
     this.render();
   }
 
-  initScene() {
+  init() {
+    /**
+     * Scene
+     */
     this.scene = new Scene();
-  }
 
-  initCamera() {
+    /**
+     * Renderer
+     */
+    this.renderer = new WebGLRenderer({
+      canvas: document.getElementById("js-canvas"),
+      antialias: true,
+    });
+    this.renderer.setClearColor(0xffffff);
+
+    /**
+     * Camera
+     */
     this.camera = new PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -45,33 +51,7 @@ class App {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableZoom = false;
-  }
 
-  initRenderer() {
-    this.renderer = new WebGLRenderer({
-      canvas: document.getElementById("js-canvas"),
-      antialias: true,
-    });
-    this.renderer.setClearColor(0xffffff);
-    window.addEventListener("resize", this.onResize);
-  }
-
-  onResize() {
-    this.setRendererSize();
-    // this.distortionPlane.onResize();
-  }
-
-  onScroll(e) {
-    this.slideshow.onScroll(e);
-  }
-
-  setRendererSize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  addObjects() {
     /*
     this.distortionPlane = new DistortionPlane({
       camera: this.camera,
@@ -79,8 +59,51 @@ class App {
     });
     this.scene.add(this.distortionPlane);
     */
+
+    /**
+     * Slideshow
+     */
     this.slideshow = new Slideshow();
     this.scene.add(this.slideshow);
+
+    /**
+     * Optional debug stuff
+     */
+    if (DEBUG) {
+      const helper = new GridHelper(200, 20);
+      helper.rotation.x = 1.5708;
+      this.scene.add(helper);
+    }
+
+    /**
+     * GUI
+     */
+    this.gui = new Tweakpane();
+
+    /**
+     * Scroll handling
+     */
+    this.vs = new VirtualScroll();
+    this.vs.on(this.onScroll, this);
+  }
+
+  setRendererSize() {
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  setCameraAspect() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+  }
+
+  onResize() {
+    this.setRendererSize();
+    this.setCameraAspect();
+    // this.distortionPlane.onResize();
+  }
+
+  onScroll(e) {
+    this.slideshow.onScroll(e);
   }
 
   render() {
