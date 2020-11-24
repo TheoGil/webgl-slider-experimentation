@@ -1,4 +1,5 @@
 import { Object3D } from "three";
+import gsap from "gsap";
 import Slide from "./Slide";
 import clamp from "../helpers/clamp";
 
@@ -97,8 +98,10 @@ class Slideshow extends Object3D {
     if (!this.hasTransitionRunning) {
       this.hasTransitionRunning = true;
       this.activeSlide = mesh.parent;
-      this.activeSlide.open().then(() => {
-        this.hasTransitionRunning = false;
+      this.truckToSlide(this.activeSlide).then(() => {
+        this.activeSlide.open().then(() => {
+          this.hasTransitionRunning = false;
+        });
       });
     }
   }
@@ -111,6 +114,17 @@ class Slideshow extends Object3D {
         this.activeSlide = null;
       });
     }
+  }
+
+  truckToSlide(slide) {
+    return new Promise((resolve) => {
+      gsap.killTweensOf(this.position);
+      gsap.to(this.position, {
+        x: -slide.position.x,
+        duration: 1,
+        onComplete: resolve,
+      });
+    });
   }
 }
 
