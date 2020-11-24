@@ -1,4 +1,5 @@
-import { Mesh, MeshBasicMaterial, Object3D, PlaneBufferGeometry } from "three";
+import { Object3D } from "three";
+import Slide from "./Slide";
 import clamp from "../helpers/clamp";
 
 const SLIDES_PARAMS = [
@@ -38,30 +39,7 @@ const SLIDES_PARAMS = [
     y: 0,
   },
 ];
-const SLIDE_GEO_SEGMENTS = 10;
 const SLIDE_SPACING = 12.5;
-
-class Slide extends Object3D {
-  constructor(options) {
-    super(options);
-
-    const geometry = new PlaneBufferGeometry(
-      options.width,
-      options.height,
-      SLIDE_GEO_SEGMENTS,
-      SLIDE_GEO_SEGMENTS
-    );
-
-    const material = new MeshBasicMaterial({
-      wireframe: false,
-      color: 0x000000,
-    });
-
-    this.mesh = new Mesh(geometry, material);
-
-    this.add(this.mesh);
-  }
-}
 
 class Slideshow extends Object3D {
   constructor() {
