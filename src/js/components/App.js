@@ -1,7 +1,9 @@
-import { Scene, PerspectiveCamera, WebGLRenderer } from "three";
+import { Scene, PerspectiveCamera, WebGLRenderer, GridHelper } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import VirtualScroll from "virtual-scroll";
 import Tweakpane from "tweakpane";
 import DistortionPlane from "./DistortionPlane";
+import Slideshow from "./Slideshow";
 
 class App {
   constructor() {
@@ -11,11 +13,19 @@ class App {
     this.render = this.render.bind(this);
 
     this.gui = new Tweakpane();
+
+    this.vs = new VirtualScroll();
+    this.vs.on(this.onScroll, this);
+
     this.initScene();
     this.initRenderer();
     this.initCamera();
     this.setRendererSize();
     this.addObjects();
+
+    const helper = new GridHelper(200, 20);
+    helper.rotation.x = 1.5708;
+    this.scene.add(helper);
 
     this.render();
   }
@@ -32,7 +42,9 @@ class App {
       1000
     );
     this.camera.position.z = 100;
-    new OrbitControls(this.camera, this.renderer.domElement);
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableZoom = false;
   }
 
   initRenderer() {
@@ -40,13 +52,17 @@ class App {
       canvas: document.getElementById("js-canvas"),
       antialias: true,
     });
-    this.renderer.setClearColor(0x263339);
+    this.renderer.setClearColor(0xffffff);
     window.addEventListener("resize", this.onResize);
   }
 
   onResize() {
     this.setRendererSize();
-    this.distortionPlane.onResize();
+    // this.distortionPlane.onResize();
+  }
+
+  onScroll(e) {
+    this.slideshow.onScroll(e);
   }
 
   setRendererSize() {
@@ -56,11 +72,15 @@ class App {
   }
 
   addObjects() {
+    /*
     this.distortionPlane = new DistortionPlane({
       camera: this.camera,
       gui: this.gui,
     });
     this.scene.add(this.distortionPlane);
+    */
+    this.slideshow = new Slideshow();
+    this.scene.add(this.slideshow);
   }
 
   render() {
