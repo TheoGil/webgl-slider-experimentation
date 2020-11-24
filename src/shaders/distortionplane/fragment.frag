@@ -1,6 +1,5 @@
 varying vec2 vUv;
 uniform float u_distortionAmount;
-uniform float u_circleRadius;
 
 void main() {
   float d = distance(vUv, vec2(.5));
