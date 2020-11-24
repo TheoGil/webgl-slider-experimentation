@@ -11,8 +11,14 @@ class Slide extends Object3D {
     this.isFullScreen = false;
     this.width = options.width;
     this.height = options.height;
+    this.posY = options.y;
     this.viewportWidth = options.viewportWidth;
     this.viewportHeight = options.viewportHeight;
+    this.tweenProperties = {
+      scaleX: 1,
+      scaleY: 1,
+      posY: this.posY,
+    };
 
     const geometry = new PlaneBufferGeometry(
       this.width,
@@ -34,21 +40,27 @@ class Slide extends Object3D {
   open() {
     const newScaleX = this.viewportWidth / this.width;
     const newScaleY = this.viewportHeight / this.height;
-    return this.tweenScale(newScaleX, newScaleY);
+    return this.tweenScale(newScaleX, newScaleY, 0);
   }
 
   close() {
-    return this.tweenScale(1, 1);
+    return this.tweenScale(1, 1, this.posY);
   }
 
-  tweenScale(scaleX, scaleY) {
-    gsap.killTweensOf(this.mesh.scale);
+  tweenScale(scaleX, scaleY, posY) {
+    gsap.killTweensOf(this.tweenProperties);
 
     return new Promise((resolve) => {
-      gsap.to(this.mesh.scale, {
-        x: scaleX,
-        y: scaleY,
+      gsap.to(this.tweenProperties, {
+        scaleX,
+        scaleY,
+        posY,
         duration: TWEEN_DURATION,
+        onUpdate: () => {
+          this.mesh.scale.x = this.tweenProperties.scaleX;
+          this.mesh.scale.y = this.tweenProperties.scaleY;
+          this.position.y = this.tweenProperties.posY;
+        },
         onComplete: resolve,
       });
     });
