@@ -107,6 +107,7 @@ class App {
     this.slideshow = new Slideshow({
       viewportWidth: this.width,
       viewportHeight: this.height,
+      gui: this.gui,
     });
     this.scene.add(this.slideshow);
 

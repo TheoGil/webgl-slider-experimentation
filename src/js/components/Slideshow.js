@@ -41,11 +41,16 @@ const SLIDES_PARAMS = [
   },
 ];
 const SLIDE_SPACING = 12.5;
+const DEBUG = true;
+const PARAMS = {
+  distortion: 0,
+};
 
 class Slideshow extends Object3D {
   constructor(options) {
     super(options);
 
+    this.gui = options.gui;
     this.viewportWidth = options.viewportWidth;
     this.viewportHeight = options.viewportHeight;
     this.slides = [];
@@ -56,6 +61,10 @@ class Slideshow extends Object3D {
 
     this.initSlides();
     this.setScrollMinMax();
+
+    if (DEBUG) {
+      this.initGUI();
+    }
   }
 
   initSlides() {
@@ -125,6 +134,24 @@ class Slideshow extends Object3D {
         onComplete: resolve,
       });
     });
+  }
+
+  initGUI() {
+    const folder = this.gui.addFolder({
+      title: "Slideshow",
+    });
+
+    folder
+      .addInput(PARAMS, "distortion", {
+        min: -50,
+        max: 50,
+        step: 0.01,
+      })
+      .on("change", (value) => {
+        this.slides.forEach((slide) => {
+          slide.mesh.material.uniforms.u_distortionAmount.value = value;
+        });
+      });
   }
 }
 
