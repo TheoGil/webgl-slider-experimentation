@@ -6,11 +6,14 @@ import {
   Raycaster,
 } from "three";
 import VirtualScroll from "virtual-scroll";
+import lerp from "lerp";
 import Tweakpane from "tweakpane";
 import Slideshow from "./Slideshow";
 import PostFX from "./PostFX";
+import map from "../helpers/map";
 
-const DEBUG = true;
+const SCROLL_LERP_FACTOR = 0.075;
+const SCROLL_LERP_THRESHOLD = 0.01;
 
 class App {
   constructor() {
@@ -80,6 +83,8 @@ class App {
     /**
      * Scroll handling
      */
+    this.scroll = 0;
+    this.scrollTarget = 0;
     this.vs = new VirtualScroll();
     this.vs.on(this.onScroll, this);
 
@@ -164,11 +169,32 @@ class App {
   }
 
   onScroll(e) {
-    this.slideshow.onScroll(e);
+    this.scrollTarget = e.y;
+  }
+
+  lerpScroll() {
+    if (Math.abs(this.scroll - this.scrollTarget) > SCROLL_LERP_THRESHOLD) {
+      this.scroll = lerp(this.scroll, this.scrollTarget, SCROLL_LERP_FACTOR);
+    } else {
+      this.scroll = this.scrollTarget;
+    }
   }
 
   render() {
     requestAnimationFrame(this.render);
+
+    this.lerpScroll();
+
+    //////////////////////
+    // const d = document.querySelector("#debug");
+    // d.innerText = Math.abs(this.scroll - this.scrollTarget).toFixed(2);
+    //////////////////////
+
+    this.slideshow.onScroll(this.scroll);
+    this.pp.setDistortion(
+      map(Math.min(this.scroll - this.scrollTarget, 100), 0, 100, 0, 20)
+    );
+
     this.pp.render(this.scene, this.camera);
   }
 }

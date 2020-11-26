@@ -109,10 +109,10 @@ class Slideshow extends Object3D {
     this.scrollMax = -SLIDES_PARAMS[0].width / 2;
   }
 
-  onScroll(e) {
+  onScroll(amount) {
     // Prevent scroll if slide is opened
     if (!this.activeSlide) {
-      this.position.x = clamp(e.y, this.scrollMin, this.scrollMax);
+      this.position.x = clamp(amount, this.scrollMin, this.scrollMax);
     }
   }
 

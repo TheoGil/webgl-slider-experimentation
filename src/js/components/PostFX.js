@@ -68,6 +68,10 @@ class PostFX {
     );
   }
 
+  setDistortion(amount) {
+    this.mesh.material.uniforms.u_distortionAmount.value = amount;
+  }
+
   initGUI() {
     const folder = this.gui.addFolder({
       title: "PostFX",
