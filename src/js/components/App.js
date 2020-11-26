@@ -61,7 +61,7 @@ class App {
       canvas: document.getElementById("js-canvas"),
       antialias: false,
     });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(window.devicePixelRatio || 1);
     this.renderer.setClearColor(0xffffff);
 
     /**
