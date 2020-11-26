@@ -2,14 +2,13 @@ import {
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
-  GridHelper,
   Vector2,
   Raycaster,
 } from "three";
 import VirtualScroll from "virtual-scroll";
 import Tweakpane from "tweakpane";
-import DistortionPlane from "./DistortionPlane";
 import Slideshow from "./Slideshow";
+import PostFX from "./PostFX";
 
 const DEBUG = true;
 
@@ -57,7 +56,7 @@ class App {
      */
     this.renderer = new WebGLRenderer({
       canvas: document.getElementById("js-canvas"),
-      antialias: true,
+      antialias: false,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setClearColor(0xffffff);
@@ -93,14 +92,6 @@ class App {
   }
 
   addObjects() {
-    /*
-    this.distortionPlane = new DistortionPlane({
-      camera: this.camera,
-      gui: this.gui,
-    });
-    this.scene.add(this.distortionPlane);
-    */
-
     /**
      * Slideshow
      */
@@ -112,13 +103,15 @@ class App {
     this.scene.add(this.slideshow);
 
     /**
-     * Optional debug stuff
+     * Post processing
      */
-    if (DEBUG) {
-      const helper = new GridHelper(200, 20);
-      helper.rotation.x = 1.5708;
-      // this.scene.add(helper);
-    }
+    this.pp = new PostFX({
+      renderer: this.renderer,
+      gui: this.gui,
+      width: this.width,
+      height: this.height,
+      camera: this.camera,
+    });
   }
 
   setRendererSize() {
@@ -141,7 +134,7 @@ class App {
   onResize() {
     this.setRendererSize();
     this.setCameraAspect();
-    // this.distortionPlane.onResize();
+    this.pp.onResize();
   }
 
   onMouseDown(e) {
@@ -176,8 +169,7 @@ class App {
 
   render() {
     requestAnimationFrame(this.render);
-
-    this.renderer.render(this.scene, this.camera);
+    this.pp.render(this.scene, this.camera);
   }
 }
 
