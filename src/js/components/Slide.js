@@ -17,7 +17,6 @@ class Slide extends Object3D {
     this.width = options.width;
     this.height = options.height;
     this.posY = options.y;
-    this.posX = options.x;
     this.initialPosY = this.posY;
     this.viewportWidth = options.viewportWidth;
     this.viewportHeight = options.viewportHeight;
@@ -56,7 +55,7 @@ class Slide extends Object3D {
     });
 
     this.mesh = new Mesh(geometry, material);
-    this.mesh.position.set(this.posX, this.posY, 0);
+    this.mesh.position.set(options.x, this.posY, 0);
     this.add(this.mesh);
 
     // We're using two timelines.
@@ -111,7 +110,7 @@ class Slide extends Object3D {
 
     // Align plane vertically to viewport center, start right at the beginning
     this.ftl.to(
-      this.position,
+      this.mesh.position,
       {
         y: 0,
         duration: FORWARD_TWEEN_DURATION,
@@ -161,7 +160,7 @@ class Slide extends Object3D {
 
     // Reset original y position, start right at the beginning
     this.btl.to(
-      this.position,
+      this.mesh.position,
       {
         y: this.posY,
         ease: "power2.in",

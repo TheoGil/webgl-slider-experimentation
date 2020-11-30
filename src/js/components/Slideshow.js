@@ -136,10 +136,9 @@ class Slideshow extends Object3D {
     if (!this.hasTransitionRunning) {
       this.hasTransitionRunning = true;
       this.activeSlide = mesh.parent;
-      this.truckToSlide(this.activeSlide).then(() => {
-        this.activeSlide.open().then(() => {
-          this.hasTransitionRunning = false;
-        });
+      this.moveToSlide(mesh);
+      this.activeSlide.open().then(() => {
+        this.hasTransitionRunning = false;
       });
     }
   }
@@ -154,15 +153,24 @@ class Slideshow extends Object3D {
     }
   }
 
-  truckToSlide(slide) {
-    return new Promise((resolve) => {
-      gsap.killTweensOf(this.position);
-      gsap.to(this.position, {
-        x: -slide.mesh.position.x,
+  moveToSlide(mesh) {
+    gsap.to(
+      this.slides.map((slide) => slide.mesh.position),
+      {
+        x: `-=${mesh.position.x}`,
+        ease: "power2.out",
         duration: 1,
-        onComplete: resolve,
-      });
-    });
+        onUpdate: () => {
+          this.slides.forEach((slide) => {
+            slide.respawn(
+              Math.sign(mesh.position.x),
+              this.viewportWidth,
+              this.width
+            );
+          });
+        },
+      }
+    );
   }
 
   initGUI() {
