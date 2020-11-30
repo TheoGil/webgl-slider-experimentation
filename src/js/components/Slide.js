@@ -35,6 +35,7 @@ class Slide extends Object3D {
       wireframe: false,
       vertexShader,
       fragmentShader,
+      depthTest: false,
       uniforms: {
         u_distortionAmount: {
           value: 0,
@@ -79,6 +80,9 @@ class Slide extends Object3D {
   initForwardTimeLine() {
     this.ftl = gsap.timeline({
       paused: true,
+      onStart: () => {
+        this.mesh.renderOrder = 1;
+      },
     });
 
     // Bend plane, start right at the beginning
@@ -126,6 +130,9 @@ class Slide extends Object3D {
   initBackwardTimeline() {
     this.btl = gsap.timeline({
       paused: true,
+      onComplete: () => {
+        this.mesh.renderOrder = 0;
+      },
     });
 
     // Bend plane, start right at the beginning
