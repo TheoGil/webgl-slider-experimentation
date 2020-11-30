@@ -4,16 +4,22 @@ import {
   WebGLRenderer,
   Vector2,
   Raycaster,
+  Mesh,
+  PlaneBufferGeometry,
+  MeshBasicMaterial,
 } from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
 import lerp from "lerp";
 import Tweakpane from "tweakpane";
 import Slideshow from "./Slideshow";
 import PostFX from "./PostFX";
-import map from "../helpers/map";
+import Stats from "stats-js";
 
 const SCROLL_LERP_FACTOR = 0.075;
 const SCROLL_LERP_THRESHOLD = 0.01;
+const SCROLL_MULTIPLIER = 0.15;
+const DEBUG = true;
 
 class App {
   constructor() {
@@ -74,11 +80,15 @@ class App {
       1000
     );
     this.camera.position.z = 100;
+    // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    // this.controls.enableZoom = false;
 
     /**
      * GUI
      */
     this.gui = new Tweakpane();
+    this.stats = new Stats();
+    document.body.appendChild(this.stats.dom);
 
     /**
      * Scroll handling
@@ -97,6 +107,15 @@ class App {
   }
 
   addObjects() {
+    if (DEBUG) {
+      this.scene.add(
+        new Mesh(
+          new PlaneBufferGeometry(this.width, this.height, 4, 4),
+          new MeshBasicMaterial({ color: 0x000000, wireframe: true })
+        )
+      );
+    }
+
     /**
      * Slideshow
      */
@@ -117,6 +136,8 @@ class App {
       height: this.height,
       camera: this.camera,
     });
+
+    // this.gui.addInput(this.controls, "enableZoom");
   }
 
   setRendererSize() {
@@ -169,31 +190,29 @@ class App {
   }
 
   onScroll(e) {
-    this.scrollTarget = e.y;
+    this.scroll = e.deltaY * SCROLL_MULTIPLIER;
+    this.slideshow.scrollDirection = Math.sign(e.deltaY);
   }
 
   lerpScroll() {
-    if (Math.abs(this.scroll - this.scrollTarget) > SCROLL_LERP_THRESHOLD) {
-      this.scroll = lerp(this.scroll, this.scrollTarget, SCROLL_LERP_FACTOR);
+    if (Math.abs(this.scroll) > SCROLL_LERP_THRESHOLD) {
+      this.scroll = lerp(this.scroll, 0, SCROLL_LERP_FACTOR);
     } else {
-      this.scroll = this.scrollTarget;
+      this.scroll = 0;
     }
   }
 
   render() {
     requestAnimationFrame(this.render);
 
+    this.stats.begin();
+
     this.lerpScroll();
 
-    //////////////////////
-    // const d = document.querySelector("#debug");
-    // d.innerText = Math.abs(this.scroll - this.scrollTarget).toFixed(2);
-    //////////////////////
+    this.slideshow.update(this.scroll);
+    this.pp.update(this.scroll);
 
-    this.slideshow.onScroll(this.scroll);
-    this.pp.setDistortion(
-      map(Math.min(this.scroll - this.scrollTarget, 100), 0, 100, 0, 20)
-    );
+    this.stats.end();
 
     this.pp.render(this.scene, this.camera);
   }

@@ -1,8 +1,14 @@
 import { Object3D, TextureLoader } from "three";
 import gsap from "gsap";
 import Slide from "./Slide";
-import clamp from "../helpers/clamp";
-import slideSrc1 from "../../img/portrait1.jpg";
+
+import slideSrc1 from "../../img/01.jpg";
+import slideSrc2 from "../../img/02.jpg";
+import slideSrc3 from "../../img/03.jpg";
+import slideSrc4 from "../../img/04.jpg";
+import slideSrc5 from "../../img/05.jpg";
+import slideSrc6 from "../../img/06.jpg";
+import slideSrc7 from "../../img/07.jpg";
 
 const SLIDES_PARAMS = [
   {
@@ -15,37 +21,37 @@ const SLIDES_PARAMS = [
     width: 15,
     height: 15,
     y: 7,
-    src: slideSrc1,
+    src: slideSrc2,
   },
   {
     width: 32,
     height: 51,
     y: 0,
-    src: slideSrc1,
+    src: slideSrc3,
   },
   {
     width: 32,
     height: 32,
     y: 0,
-    src: slideSrc1,
+    src: slideSrc4,
   },
   {
     width: 32,
     height: 51,
     y: 0,
-    src: slideSrc1,
+    src: slideSrc5,
   },
   {
     width: 32,
     height: 32,
     y: -16,
-    src: slideSrc1,
+    src: slideSrc6,
   },
   {
     width: 25,
     height: 40,
     y: 0,
-    src: slideSrc1,
+    src: slideSrc7,
   },
 ];
 const SLIDE_SPACING = 12.5;
@@ -61,14 +67,21 @@ class Slideshow extends Object3D {
     this.gui = options.gui;
     this.viewportWidth = options.viewportWidth;
     this.viewportHeight = options.viewportHeight;
+
     this.slides = [];
-    this.scrollMin = 0;
-    this.scrollMax = 0;
+
+    // Initiated at 0 but will be computed in the computeWidth method, once the slide have been initialized
+    this.width = 0;
+
+    // 1 = Moving forward
+    // -1 = Moving backward
+    this.scrollDirection = 0;
+
     this.hasTransitionRunning = false;
     this.activeSlide = null;
 
     this.initSlides();
-    this.setScrollMinMax();
+    this.computeWidth();
 
     if (DEBUG) {
       this.initGUI();
@@ -80,39 +93,42 @@ class Slideshow extends Object3D {
 
     const textureLoader = new TextureLoader();
 
-    SLIDES_PARAMS.forEach(({ width, height, y, src }) => {
+    SLIDES_PARAMS.forEach(({ width, height, y, src }, i) => {
       const slide = new Slide({
+        id: i,
         width,
         height,
         y,
+        x: xOff,
         src,
         textureLoader,
         viewportWidth: this.viewportWidth,
         viewportHeight: this.viewportHeight,
       });
 
-      slide.position.set(xOff + width / 2, y, 0);
-
-      // Update the xOff for the next slide
-      xOff += width + SLIDE_SPACING;
+      if (i < SLIDES_PARAMS.length - 1) {
+        xOff += width / 2 + SLIDES_PARAMS[i + 1].width / 2 + SLIDE_SPACING;
+      }
 
       this.slides.push(slide);
       this.add(slide);
     });
-
-    // Center the slideshow on the first slide
-    this.position.x = -SLIDES_PARAMS[0].width / 2;
   }
 
-  setScrollMinMax() {
-    this.scrollMin = -this.slides[this.slides.length - 1].position.x;
-    this.scrollMax = -SLIDES_PARAMS[0].width / 2;
+  computeWidth() {
+    this.width =
+      SLIDES_PARAMS.reduce(function (a, b) {
+        return a + b.width;
+      }, 0) +
+      SLIDES_PARAMS.length * SLIDE_SPACING;
   }
 
-  onScroll(amount) {
-    // Prevent scroll if slide is opened
+  update(translation) {
     if (!this.activeSlide) {
-      this.position.x = clamp(amount, this.scrollMin, this.scrollMax);
+      this.slides.forEach((slide, i) => {
+        slide.updateTranslation(translation);
+        slide.respawn(this.scrollDirection, this.viewportWidth, this.width);
+      });
     }
   }
 
@@ -142,7 +158,7 @@ class Slideshow extends Object3D {
     return new Promise((resolve) => {
       gsap.killTweensOf(this.position);
       gsap.to(this.position, {
-        x: -slide.position.x,
+        x: -slide.mesh.position.x,
         duration: 1,
         onComplete: resolve,
       });

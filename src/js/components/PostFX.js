@@ -6,11 +6,14 @@ import {
   ShaderMaterial,
   PlaneBufferGeometry,
 } from "three";
+import map from "../helpers/map";
 
 import vertexShader from "../../shaders/postfx/vertex.vert";
 import fragmentShader from "../../shaders/postfx/fragment.frag";
 
 const SEGMENTS = 25;
+const DISTORTION_MAX = 50;
+const SCROLL_MAX = 25;
 
 class PostFX {
   constructor(options) {
@@ -68,8 +71,9 @@ class PostFX {
     );
   }
 
-  setDistortion(amount) {
-    this.mesh.material.uniforms.u_distortionAmount.value = amount;
+  update(scroll) {
+    const distortionAmount = map(scroll, 0, SCROLL_MAX, 0, DISTORTION_MAX);
+    this.mesh.material.uniforms.u_distortionAmount.value = distortionAmount;
   }
 
   initGUI() {

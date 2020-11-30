@@ -17,6 +17,8 @@ class Slide extends Object3D {
     this.width = options.width;
     this.height = options.height;
     this.posY = options.y;
+    this.posX = options.x;
+    this.initialPosY = this.posY;
     this.viewportWidth = options.viewportWidth;
     this.viewportHeight = options.viewportHeight;
     this.textureWidth = 0;
@@ -46,11 +48,14 @@ class Slide extends Object3D {
         u_resOut: {
           value: [this.width, this.height],
         },
+        u_debugColor: {
+          value: [0, 1, 0],
+        },
       },
     });
 
     this.mesh = new Mesh(geometry, material);
-
+    this.mesh.position.set(this.posX, this.posY, 0);
     this.add(this.mesh);
 
     // We're using two timelines.
@@ -179,6 +184,35 @@ class Slide extends Object3D {
 
   close() {
     return this.btl.restart(0);
+  }
+
+  updateTranslation(translation) {
+    this.mesh.position.x += translation;
+  }
+
+  respawn(direction, viewportWidth, slideshowWidth) {
+    if (this.mesh.position.x + this.width / 2 < -viewportWidth / 2) {
+      this.red();
+      if (direction === -1) {
+        this.mesh.position.x += slideshowWidth;
+      }
+    } else if (this.mesh.position.x - this.width / 2 > viewportWidth / 2) {
+      this.red();
+
+      if (direction === 1) {
+        this.mesh.position.x -= slideshowWidth;
+      }
+    } else {
+      this.green();
+    }
+  }
+
+  red() {
+    this.mesh.material.uniforms.u_debugColor.value = [1, 0, 0];
+  }
+
+  green() {
+    this.mesh.material.uniforms.u_debugColor.value = [0, 1, 0];
   }
 }
 
