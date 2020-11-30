@@ -12,49 +12,51 @@ import slideSrc7 from "../../img/07.jpg";
 
 const SLIDES_PARAMS = [
   {
-    width: 25,
-    height: 40,
+    width: 0.23,
+    height: 0.23,
     y: 0,
     src: slideSrc1,
   },
   {
-    width: 15,
-    height: 15,
-    y: 7,
+    width: 0.25,
+    height: 0.39,
+    y: 0,
     src: slideSrc2,
   },
   {
-    width: 32,
-    height: 51,
-    y: 0,
+    width: 0.23,
+    height: 0.23,
+    y: -0.125,
     src: slideSrc3,
   },
   {
-    width: 32,
-    height: 32,
+    width: 0.15,
+    height: 0.15,
     y: 0,
     src: slideSrc4,
   },
+
   {
-    width: 32,
-    height: 51,
+    width: 0.25,
+    height: 0.39,
     y: 0,
+
     src: slideSrc5,
   },
   {
-    width: 32,
-    height: 32,
-    y: -16,
+    width: 0.15,
+    height: 0.15,
+    y: 0.15,
     src: slideSrc6,
   },
   {
-    width: 25,
-    height: 40,
-    y: 0,
+    width: 0.23,
+    height: 0.23,
+    y: -0.125,
     src: slideSrc7,
   },
 ];
-const SLIDE_SPACING = 12.5;
+const SLIDE_SPACING = 0.1;
 const DEBUG = false;
 const PARAMS = {
   distortion: 0,
@@ -96,9 +98,9 @@ class Slideshow extends Object3D {
     SLIDES_PARAMS.forEach(({ width, height, y, src }, i) => {
       const slide = new Slide({
         id: i,
-        width,
-        height,
-        y,
+        width: this.viewportWidth * width,
+        height: this.viewportWidth * height,
+        y: this.viewportWidth * y,
         x: xOff,
         src,
         textureLoader,
@@ -107,7 +109,10 @@ class Slideshow extends Object3D {
       });
 
       if (i < SLIDES_PARAMS.length - 1) {
-        xOff += width / 2 + SLIDES_PARAMS[i + 1].width / 2 + SLIDE_SPACING;
+        xOff +=
+          (width * this.viewportWidth) / 2 +
+          (SLIDES_PARAMS[i + 1].width * this.viewportWidth) / 2 +
+          SLIDE_SPACING * this.viewportWidth;
       }
 
       this.slides.push(slide);
@@ -117,10 +122,8 @@ class Slideshow extends Object3D {
 
   computeWidth() {
     this.width =
-      SLIDES_PARAMS.reduce(function (a, b) {
-        return a + b.width;
-      }, 0) +
-      SLIDES_PARAMS.length * SLIDE_SPACING;
+      SLIDES_PARAMS.reduce((a, b) => a + b.width * this.viewportWidth, 0) +
+      SLIDES_PARAMS.length * SLIDE_SPACING * this.viewportWidth;
   }
 
   update(translation) {
