@@ -8,8 +8,9 @@ class Slideshow extends Object3D {
     super(options);
 
     this.viewportWidth = options.viewportWidth;
+    this.viewportHeight = options.viewportHeight;
     this.gui = options.gui;
-    this.ratio = Math.min(options.viewportWidth, options.viewportHeight);
+    this.ratio = Math.min(this.viewportWidth, this.viewportHeight);
     this.slides = [];
     this.width = 0; // Initiated at 0 but will be computed in the computeWidth method, once the slide have been initialized
     this.scrollDirection = 0; // 1 = Moving forward | -1 = Moving backward
