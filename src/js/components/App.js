@@ -166,9 +166,10 @@ class App {
   onResize() {
     this.setRendererSize();
     this.setCameraAspect();
-    this.postFX.onResize();
     this.setViewportDimensions();
     this.text.onResize(this.width, this.height);
+    this.slideshow.onResize(this.width, this.height);
+    this.postFX.onResize();
   }
 
   onMouseDown(e) {
