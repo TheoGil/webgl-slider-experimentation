@@ -12,14 +12,15 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
 import lerp from "lerp";
 import Tweakpane from "tweakpane";
+import Stats from "stats-js";
 import Slideshow from "./Slideshow";
 import PostFX from "./PostFX";
-import Stats from "stats-js";
+import Text from "./Text";
 
 const SCROLL_LERP_FACTOR = 0.075;
 const SCROLL_LERP_THRESHOLD = 0.01;
 const SCROLL_MULTIPLIER = 0.15;
-const DEBUG = true;
+const DEBUG = false;
 
 class App {
   constructor() {
@@ -129,7 +130,7 @@ class App {
     /**
      * Post processing
      */
-    this.pp = new PostFX({
+    this.postFX = new PostFX({
       renderer: this.renderer,
       gui: this.gui,
       width: this.width,
@@ -137,7 +138,12 @@ class App {
       camera: this.camera,
     });
 
-    // this.gui.addInput(this.controls, "enableZoom");
+    this.text = new Text({
+      width: this.width,
+      height: this.height,
+      anisotropy: this.renderer.capabilities.getMaxAnisotropy(),
+    });
+    this.scene.add(this.text);
   }
 
   setRendererSize() {
@@ -160,7 +166,9 @@ class App {
   onResize() {
     this.setRendererSize();
     this.setCameraAspect();
-    this.pp.onResize();
+    this.postFX.onResize();
+    this.setViewportDimensions();
+    this.text.onResize(this.width, this.height);
   }
 
   onMouseDown(e) {
@@ -207,14 +215,13 @@ class App {
 
     this.stats.begin();
 
+    this.text.update();
     this.lerpScroll();
-
     this.slideshow.update(this.scroll);
-    this.pp.update(this.scroll);
+    this.postFX.update(this.scroll);
+    this.postFX.render(this.scene, this.camera);
 
     this.stats.end();
-
-    this.pp.render(this.scene, this.camera);
   }
 }
 
