@@ -66,6 +66,7 @@ class App {
     this.renderer = new WebGLRenderer({
       canvas: document.getElementById("js-canvas"),
       antialias: false,
+      sortObjects: false,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio || 1);
     this.renderer.setClearColor(0xffffff);
@@ -116,13 +117,6 @@ class App {
       );
     }
 
-    this.text = new Text({
-      width: this.width,
-      height: this.height,
-      anisotropy: this.renderer.capabilities.getMaxAnisotropy(),
-    });
-    this.scene.add(this.text);
-
     this.slideshow = new Slideshow({
       renderer: this.renderer,
       camera: this.camera,
@@ -131,6 +125,17 @@ class App {
       gui: this.gui,
     });
     this.scene.add(this.slideshow.mesh);
+
+    this.text = new Text({
+      width: this.width,
+      height: this.height,
+      anisotropy: this.renderer.capabilities.getMaxAnisotropy(),
+    });
+    this.scene.add(this.text);
+
+    this.text.backCylinder.renderOrder = 0;
+    this.slideshow.mesh.renderOrder = 1;
+    this.text.frontCylinder.renderOrder = 2;
   }
 
   setRendererSize() {

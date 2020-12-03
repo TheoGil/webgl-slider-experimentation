@@ -62,7 +62,6 @@ class Slideshow extends Object3D {
       fragmentShader,
       vertexShader,
       transparent: true,
-      depthWrite: false,
       depthTest: false,
       uniforms: {
         u_scene: { value: this.target.texture },
