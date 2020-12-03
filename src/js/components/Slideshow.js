@@ -172,7 +172,7 @@ class Slideshow extends Object3D {
   }
 
   render() {
-    this.renderer.setClearColor(0x00ffff, 0.5);
+    this.renderer.setClearColor(0xffffff, 0);
     this.renderer.setRenderTarget(this.target);
     this.renderer.render(this.bufferScene, this.camera);
 
