@@ -51,12 +51,7 @@ class Slideshow extends Object3D {
       }
     );
 
-    this.geometry = new PlaneBufferGeometry(
-      this.viewportWidth,
-      this.viewportHeight,
-      SEGMENTS,
-      SEGMENTS
-    );
+    this.geometry = new PlaneBufferGeometry(1, 1, SEGMENTS, SEGMENTS);
 
     this.material = new ShaderMaterial({
       fragmentShader,
@@ -70,6 +65,7 @@ class Slideshow extends Object3D {
     });
 
     this.mesh = new Mesh(this.geometry, this.material);
+    this.mesh.scale.set(this.viewportWidth, this.viewportHeight, 1);
     this.mesh.frustumCulled = false;
     this.scene.add(this.mesh);
   }
@@ -122,6 +118,7 @@ class Slideshow extends Object3D {
       window.innerWidth * window.devicePixelRatio,
       window.innerHeight * window.devicePixelRatio
     );
+    this.mesh.scale.set(newWidth, newHeight, 1);
   }
 
   update(translation) {
@@ -175,7 +172,7 @@ class Slideshow extends Object3D {
   }
 
   render() {
-    this.renderer.setClearColor(0xffffff, 0);
+    this.renderer.setClearColor(0x00ffff, 0.5);
     this.renderer.setRenderTarget(this.target);
     this.renderer.render(this.bufferScene, this.camera);
 
