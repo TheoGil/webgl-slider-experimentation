@@ -11,7 +11,7 @@ import {
 } from "three";
 import texture from "../../img/blink-raise-repeat.png";
 import vertexShader from "../../shaders/text/vertex.vert";
-import fragmentShader from "../../shaders/text/front.frag";
+import fragmentShader from "../../shaders/text/frag.frag";
 
 const CYLINDER_RADIUS = 0.25;
 const CYLINDER_HEIGHT = 0.3;
@@ -55,6 +55,12 @@ class Text extends Object3D {
         u_color: {
           value: new Color(0x000000),
         },
+        u_invertion: {
+          value: 1,
+        },
+        u_mask: {
+          value: options.mask,
+        },
       },
     });
 
@@ -69,6 +75,9 @@ class Text extends Object3D {
         },
         u_color: {
           value: new Color(0xdadada),
+        },
+        u_invertion: {
+          value: 0,
         },
       },
     });

@@ -130,6 +130,7 @@ class App {
       width: this.width,
       height: this.height,
       anisotropy: this.renderer.capabilities.getMaxAnisotropy(),
+      mask: this.slideshow.target.texture,
     });
     this.scene.add(this.text);
 
@@ -212,7 +213,7 @@ class App {
 
     this.text.update();
     this.slideshow.update(this.scroll);
-    // this.postFX.update(this.scroll);
+
     this.slideshow.render();
     this.renderer.render(this.scene, this.camera);
 
