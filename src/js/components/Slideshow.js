@@ -1,24 +1,78 @@
-import { Object3D, TextureLoader } from "three";
+import {
+  Object3D,
+  TextureLoader,
+  Scene,
+  WebGLRenderTarget,
+  RGBAFormat,
+  PlaneBufferGeometry,
+  ShaderMaterial,
+  Mesh,
+} from "three";
 import gsap from "gsap";
-import Slide from "./Slide";
+const SEGMENTS = 25;
+const DISTORTION_MAX = 50;
+const SCROLL_MAX = 25;
 import { SLIDES_PARAMS, SLIDE_SPACING } from "../slidesParams";
+import Slide from "./Slide";
+import vertexShader from "../../shaders/postfx/vertex.vert";
+import fragmentShader from "../../shaders/postfx/fragment.frag";
 
 class Slideshow extends Object3D {
   constructor(options) {
     super(options);
 
+    this.renderer = options.renderer;
+    this.camera = options.camera;
     this.viewportWidth = options.viewportWidth;
     this.viewportHeight = options.viewportHeight;
-    this.gui = options.gui;
     this.ratio = Math.min(this.viewportWidth, this.viewportHeight);
     this.slides = [];
     this.width = 0; // Initiated at 0 but will be computed in the computeWidth method, once the slide have been initialized
     this.scrollDirection = 0; // 1 = Moving forward | -1 = Moving backward
     this.hasTransitionRunning = false;
     this.activeSlide = null;
+    this.bufferScene = new Scene();
 
+    this.bufferScene.add(this);
     this.initSlides();
     this.computeWidth();
+    this.initPostFX();
+  }
+
+  initPostFX() {
+    this.scene = new Scene();
+
+    this.target = new WebGLRenderTarget(
+      window.innerWidth * window.devicePixelRatio,
+      window.innerHeight * window.devicePixelRatio,
+      {
+        format: RGBAFormat,
+        stencilBuffer: false,
+      }
+    );
+
+    this.geometry = new PlaneBufferGeometry(
+      this.viewportWidth,
+      this.viewportHeight,
+      SEGMENTS,
+      SEGMENTS
+    );
+
+    this.material = new ShaderMaterial({
+      fragmentShader,
+      vertexShader,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      uniforms: {
+        u_scene: { value: this.target.texture },
+        u_distortionAmount: { value: 0 },
+      },
+    });
+
+    this.mesh = new Mesh(this.geometry, this.material);
+    this.mesh.frustumCulled = false;
+    this.scene.add(this.mesh);
   }
 
   initSlides() {
@@ -64,6 +118,11 @@ class Slideshow extends Object3D {
     this.slides.forEach((slide) => {
       slide.respawn(1, this.viewportWidth, this.width);
     });
+
+    this.target.setSize(
+      window.innerWidth * window.devicePixelRatio,
+      window.innerHeight * window.devicePixelRatio
+    );
   }
 
   update(translation) {
@@ -114,6 +173,15 @@ class Slideshow extends Object3D {
         },
       }
     );
+  }
+
+  render() {
+    this.renderer.setClearColor(0xffffff, 0);
+    this.renderer.setRenderTarget(this.target);
+    this.renderer.render(this.bufferScene, this.camera);
+
+    this.renderer.setClearColor(0xffffff, 1);
+    this.renderer.setRenderTarget(null);
   }
 }
 

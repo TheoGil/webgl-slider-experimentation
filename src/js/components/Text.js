@@ -31,17 +31,6 @@ class Text extends Object3D {
     this.ratio = Math.min(options.width, options.height);
     this.anisotropy = options.anisotropy;
 
-    this.initCylinders();
-
-    this.rotation.set(GLOBAL_ROTATION_X, GLOBAL_ROTATION_Y, GLOBAL_ROTATION_Z);
-    this.position.set(
-      GLOBAL_X_OFFSET * this.ratio,
-      GLOBAL_Y_OFFSET * this.ratio,
-      0
-    );
-  }
-
-  initCylinders() {
     const map = new TextureLoader().load(texture);
     map.anisotropy = this.anisotropy;
 
@@ -57,7 +46,6 @@ class Text extends Object3D {
     this.frontMaterial = new ShaderMaterial({
       side: FrontSide,
       transparent: true,
-      depthWrite: false,
       fragmentShader,
       vertexShader,
       uniforms: {
@@ -85,11 +73,19 @@ class Text extends Object3D {
       },
     });
 
+    this.frontCylinder = new Mesh(this.geometry, this.frontMaterial);
+    this.frontCylinder.position.z = 0.1;
+    this.add(this.frontCylinder);
+
     this.backCylinder = new Mesh(this.geometry, this.backMaterial);
     this.add(this.backCylinder);
 
-    this.frontCylinder = new Mesh(this.geometry, this.frontMaterial);
-    this.add(this.frontCylinder);
+    this.rotation.set(GLOBAL_ROTATION_X, GLOBAL_ROTATION_Y, GLOBAL_ROTATION_Z);
+    this.position.set(
+      GLOBAL_X_OFFSET * this.ratio,
+      GLOBAL_Y_OFFSET * this.ratio,
+      0
+    );
   }
 
   onResize(newWidth, newHeight) {

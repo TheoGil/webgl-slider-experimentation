@@ -14,7 +14,6 @@ import lerp from "lerp";
 import Tweakpane from "tweakpane";
 import Stats from "stats-js";
 import Slideshow from "./Slideshow";
-import PostFX from "./PostFX";
 import Text from "./Text";
 
 const SCROLL_LERP_FACTOR = 0.075;
@@ -117,33 +116,21 @@ class App {
       );
     }
 
-    /**
-     * Slideshow
-     */
-    this.slideshow = new Slideshow({
-      viewportWidth: this.width,
-      viewportHeight: this.height,
-      gui: this.gui,
-    });
-    this.scene.add(this.slideshow);
-
-    /**
-     * Post processing
-     */
-    this.postFX = new PostFX({
-      renderer: this.renderer,
-      gui: this.gui,
-      width: this.width,
-      height: this.height,
-      camera: this.camera,
-    });
-
     this.text = new Text({
       width: this.width,
       height: this.height,
       anisotropy: this.renderer.capabilities.getMaxAnisotropy(),
     });
     this.scene.add(this.text);
+
+    this.slideshow = new Slideshow({
+      renderer: this.renderer,
+      camera: this.camera,
+      viewportWidth: this.width,
+      viewportHeight: this.height,
+      gui: this.gui,
+    });
+    this.scene.add(this.slideshow.mesh);
   }
 
   setRendererSize() {
@@ -216,11 +203,13 @@ class App {
 
     this.stats.begin();
 
-    this.text.update();
     this.lerpScroll();
+
+    this.text.update();
     this.slideshow.update(this.scroll);
-    this.postFX.update(this.scroll);
-    this.postFX.render(this.scene, this.camera);
+    // this.postFX.update(this.scroll);
+    this.slideshow.render();
+    this.renderer.render(this.scene, this.camera);
 
     this.stats.end();
   }
