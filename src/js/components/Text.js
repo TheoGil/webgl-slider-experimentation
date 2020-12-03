@@ -15,8 +15,8 @@ import fragmentShader from "../../shaders/text/frag.frag";
 
 const CYLINDER_RADIUS = 0.25;
 const CYLINDER_HEIGHT = 0.3;
-const CYLINDER_RADIAL_SEGMENTS = 50;
-const CYLINDER_HEIGHT_SEGMENTS = 1;
+const CYLINDER_RADIAL_SEGMENTS = 64;
+const CYLINDER_HEIGHT_SEGMENTS = 50;
 const CYLINDER_ROTATION_SPEED = 0.01;
 const GLOBAL_ROTATION_X = -0.43;
 const GLOBAL_ROTATION_Y = 0;
