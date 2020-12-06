@@ -183,7 +183,7 @@ class Slideshow extends Object3D {
 
     this.distortion =
       Math.abs(this.distortion) > LERP_THRESHOLD
-        ? lerp(this.distortion, 0, 0.01)
+        ? lerp(this.distortion, 0, 0.05)
         : 0;
     this.postProcessingMesh.material.uniforms.u_distortionAmount.value = this.distortion;
   }
