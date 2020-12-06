@@ -120,18 +120,18 @@ class App {
       viewportHeight: this.height,
       gui: this.gui,
     });
-    this.scene.add(this.slideshow.mesh);
+    this.scene.add(this.slideshow.postProcessedMesh);
 
     this.text = new Text({
       width: this.width,
       height: this.height,
       anisotropy: this.renderer.capabilities.getMaxAnisotropy(),
-      mask: this.slideshow.target.texture,
+      mask: this.slideshow.postProcessedTarget.texture,
     });
     this.scene.add(this.text);
 
     this.text.backCylinder.renderOrder = 0;
-    this.slideshow.mesh.renderOrder = 1;
+    this.slideshow.postProcessedMesh.renderOrder = 1;
     this.text.frontCylinder.renderOrder = 2;
   }
 

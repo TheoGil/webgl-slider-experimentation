@@ -7,6 +7,7 @@ import {
   PlaneBufferGeometry,
   ShaderMaterial,
   Mesh,
+  MeshBasicMaterial,
 } from "three";
 import gsap from "gsap";
 import lerp from "lerp";
@@ -41,43 +42,11 @@ class Slideshow extends Object3D {
     this.scrollDirection = 0; // 1 = Moving forward | -1 = Moving backward
     this.hasTransitionRunning = false;
     this.activeSlide = null;
-    this.bufferScene = new Scene();
+    this.scene = new Scene();
 
-    this.bufferScene.add(this);
     this.initSlides();
     this.computeWidth();
     this.initPostFX();
-  }
-
-  initPostFX() {
-    this.scene = new Scene();
-
-    this.target = new WebGLRenderTarget(
-      window.innerWidth * window.devicePixelRatio,
-      window.innerHeight * window.devicePixelRatio,
-      {
-        format: RGBAFormat,
-        stencilBuffer: false,
-      }
-    );
-
-    this.geometry = new PlaneBufferGeometry(1, 1, SEGMENTS, SEGMENTS);
-
-    this.material = new ShaderMaterial({
-      fragmentShader,
-      vertexShader,
-      transparent: true,
-      depthTest: false,
-      uniforms: {
-        u_scene: { value: this.target.texture },
-        u_distortionAmount: { value: 0 },
-      },
-    });
-
-    this.mesh = new Mesh(this.geometry, this.material);
-    this.mesh.scale.set(this.viewportWidth, this.viewportHeight, 1);
-    this.mesh.frustumCulled = false;
-    this.scene.add(this.mesh);
   }
 
   initSlides() {
@@ -106,8 +75,64 @@ class Slideshow extends Object3D {
       }
 
       this.slides.push(slide);
-      this.add(slide);
+      this.scene.add(slide);
     });
+  }
+
+  initPostFX() {
+    this.postProcessingScene = new Scene();
+    this.postProcessingTarget = new WebGLRenderTarget(
+      window.innerWidth * window.devicePixelRatio,
+      window.innerHeight * window.devicePixelRatio,
+      {
+        format: RGBAFormat,
+        stencilBuffer: false,
+      }
+    );
+    this.postProcessingGeometry = new PlaneBufferGeometry(
+      1,
+      1,
+      SEGMENTS,
+      SEGMENTS
+    );
+    this.postProcessingMaterial = new ShaderMaterial({
+      fragmentShader,
+      vertexShader,
+      transparent: true,
+      depthTest: false,
+      uniforms: {
+        u_scene: { value: this.postProcessingTarget.texture },
+        u_distortionAmount: { value: 0 },
+      },
+    });
+    this.postProcessingMesh = new Mesh(
+      this.postProcessingGeometry,
+      this.postProcessingMaterial
+    );
+    this.postProcessingMesh.scale.set(
+      this.viewportWidth,
+      this.viewportHeight,
+      1
+    );
+    this.postProcessingMesh.frustumCulled = false;
+    this.postProcessingScene.add(this.postProcessingMesh);
+
+    this.postProcessedTarget = this.postProcessingTarget.clone();
+    this.postProcessedMaterial = new MeshBasicMaterial({
+      transparent: true,
+      depthTest: false,
+      map: this.postProcessedTarget.texture,
+    });
+    this.postProcessedMesh = new Mesh(
+      this.postProcessingGeometry,
+      this.postProcessedMaterial
+    );
+    this.postProcessedMesh.scale.set(
+      this.viewportWidth,
+      this.viewportHeight,
+      1
+    );
+    this.postProcessedMesh.frustumCulled = false;
   }
 
   computeWidth() {
@@ -128,7 +153,7 @@ class Slideshow extends Object3D {
       window.innerWidth * window.devicePixelRatio,
       window.innerHeight * window.devicePixelRatio
     );
-    this.mesh.scale.set(newWidth, newHeight, 1);
+    this.postProcessingMesh.scale.set(newWidth, newHeight, 1);
   }
 
   onScroll(e) {
@@ -148,6 +173,7 @@ class Slideshow extends Object3D {
       Math.abs(this.scroll) > LERP_THRESHOLD
         ? lerp(this.scroll, 0, LERP_FRICTION)
         : 0;
+
     if (!this.activeSlide) {
       this.slides.forEach((slide) => {
         slide.updateTranslation(this.scroll);
@@ -157,9 +183,9 @@ class Slideshow extends Object3D {
 
     this.distortion =
       Math.abs(this.distortion) > LERP_THRESHOLD
-        ? lerp(this.distortion, 0, LERP_FRICTION)
+        ? lerp(this.distortion, 0, 0.01)
         : 0;
-    this.mesh.material.uniforms.u_distortionAmount.value = this.distortion;
+    this.postProcessingMesh.material.uniforms.u_distortionAmount.value = this.distortion;
   }
 
   open(mesh) {
@@ -205,8 +231,11 @@ class Slideshow extends Object3D {
 
   render() {
     this.renderer.setClearColor(0xffffff, 0);
-    this.renderer.setRenderTarget(this.target);
-    this.renderer.render(this.bufferScene, this.camera);
+    this.renderer.setRenderTarget(this.postProcessingTarget);
+    this.renderer.render(this.scene, this.camera);
+
+    this.renderer.setRenderTarget(this.postProcessedTarget);
+    this.renderer.render(this.postProcessingScene, this.camera);
 
     this.renderer.setClearColor(0xffffff, 1);
     this.renderer.setRenderTarget(null);

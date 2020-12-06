@@ -30,6 +30,7 @@ class Text extends Object3D {
 
     this.ratio = Math.min(options.width, options.height);
     this.anisotropy = options.anisotropy;
+    this.mask = options.mask;
 
     const map = new TextureLoader().load(texture);
     map.anisotropy = this.anisotropy;
@@ -59,7 +60,7 @@ class Text extends Object3D {
           value: 1,
         },
         u_mask: {
-          value: options.mask,
+          value: this.mask,
         },
       },
     });
