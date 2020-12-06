@@ -9,13 +9,19 @@ import {
   Mesh,
 } from "three";
 import gsap from "gsap";
-const SEGMENTS = 25;
-const DISTORTION_MAX = 50;
-const SCROLL_MAX = 25;
-import { SLIDES_PARAMS, SLIDE_SPACING } from "../slidesParams";
+import lerp from "lerp";
+
 import Slide from "./Slide";
 import vertexShader from "../../shaders/postfx/vertex.vert";
 import fragmentShader from "../../shaders/postfx/fragment.frag";
+
+import { SLIDES_PARAMS, SLIDE_SPACING } from "../slidesParams";
+const SEGMENTS = 200;
+
+const SCROLL_MULTIPLIER = 0.125;
+const LERP_FRICTION = 0.1;
+const LERP_THRESHOLD = 0.01;
+const DISTORTION_MULTIPLIER = 10;
 
 class Slideshow extends Object3D {
   constructor(options) {
@@ -27,7 +33,11 @@ class Slideshow extends Object3D {
     this.viewportHeight = options.viewportHeight;
     this.ratio = Math.min(this.viewportWidth, this.viewportHeight);
     this.slides = [];
+    this.delta = 0;
+    this.distortion = 0;
     this.width = 0; // Initiated at 0 but will be computed in the computeWidth method, once the slide have been initialized
+    this.scrollTarget = 0;
+    this.scroll = 0;
     this.scrollDirection = 0; // 1 = Moving forward | -1 = Moving backward
     this.hasTransitionRunning = false;
     this.activeSlide = null;
@@ -121,13 +131,35 @@ class Slideshow extends Object3D {
     this.mesh.scale.set(newWidth, newHeight, 1);
   }
 
-  update(translation) {
+  onScroll(e) {
+    this.delta = e.deltaY;
+    this.scroll = this.delta * SCROLL_MULTIPLIER;
+    this.scrollDirection = Math.sign(this.scroll);
+
+    this.distortion = lerp(
+      this.distortion,
+      this.delta * DISTORTION_MULTIPLIER,
+      0.01
+    );
+  }
+
+  update() {
+    this.scroll =
+      Math.abs(this.scroll) > LERP_THRESHOLD
+        ? lerp(this.scroll, 0, LERP_FRICTION)
+        : 0;
     if (!this.activeSlide) {
       this.slides.forEach((slide) => {
-        slide.updateTranslation(translation);
+        slide.updateTranslation(this.scroll);
         slide.respawn(this.scrollDirection, this.viewportWidth, this.width);
       });
     }
+
+    this.distortion =
+      Math.abs(this.distortion) > LERP_THRESHOLD
+        ? lerp(this.distortion, 0, LERP_FRICTION)
+        : 0;
+    this.mesh.material.uniforms.u_distortionAmount.value = this.distortion;
   }
 
   open(mesh) {

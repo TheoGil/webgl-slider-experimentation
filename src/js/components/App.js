@@ -10,15 +10,11 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
-import lerp from "lerp";
 import Tweakpane from "tweakpane";
 import Stats from "stats-js";
 import Slideshow from "./Slideshow";
 import Text from "./Text";
 
-const SCROLL_LERP_FACTOR = 0.075;
-const SCROLL_LERP_THRESHOLD = 0.01;
-const SCROLL_MULTIPLIER = 0.15;
 const DEBUG = false;
 
 class App {
@@ -191,16 +187,7 @@ class App {
   }
 
   onScroll(e) {
-    this.scroll = e.deltaY * SCROLL_MULTIPLIER;
-    this.slideshow.scrollDirection = Math.sign(e.deltaY);
-  }
-
-  lerpScroll() {
-    if (Math.abs(this.scroll) > SCROLL_LERP_THRESHOLD) {
-      this.scroll = lerp(this.scroll, 0, SCROLL_LERP_FACTOR);
-    } else {
-      this.scroll = 0;
-    }
+    this.slideshow.onScroll(e);
   }
 
   render() {
@@ -208,11 +195,8 @@ class App {
 
     this.stats.begin();
 
-    this.lerpScroll();
-
     this.text.update();
-    this.slideshow.update(this.scroll);
-
+    this.slideshow.update();
     this.slideshow.render();
     this.renderer.render(this.scene, this.camera);
 
