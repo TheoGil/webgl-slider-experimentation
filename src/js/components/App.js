@@ -10,7 +10,6 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
-import Tweakpane from "tweakpane";
 import Stats from "stats-js";
 import Slideshow from "./Slideshow";
 import Text from "./Text";
@@ -85,7 +84,6 @@ class App {
     /**
      * GUI
      */
-    this.gui = new Tweakpane();
     this.stats = new Stats();
     document.body.appendChild(this.stats.dom);
 
@@ -125,7 +123,6 @@ class App {
       camera: this.camera,
       viewportWidth: this.width,
       viewportHeight: this.height,
-      gui: this.gui,
     });
     this.scene.add(this.slideshow.postProcessedMesh);
 
