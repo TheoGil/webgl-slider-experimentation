@@ -94,7 +94,11 @@ class App {
      */
     this.scroll = 0;
     this.scrollTarget = 0;
-    this.vs = new VirtualScroll();
+    this.vs = new VirtualScroll({
+      mouseMultiplier: 0.08,
+      firefoxMultiplier: 35,
+      useKeyboard: false,
+    });
     this.vs.on(this.onScroll, this);
 
     /**

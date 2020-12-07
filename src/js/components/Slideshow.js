@@ -19,10 +19,11 @@ import fragmentShader from "../../shaders/postfx/fragment.frag";
 import { SLIDES_PARAMS, SLIDE_SPACING } from "../slidesParams";
 const SEGMENTS = 200;
 
-const SCROLL_MULTIPLIER = 0.125;
 const LERP_FRICTION = 0.1;
 const LERP_THRESHOLD = 0.01;
-const DISTORTION_MULTIPLIER = 10;
+const DISTORTION_MULTIPLIER = 100;
+const DISTORTION_MIN = -100;
+const DISTORTION_MAX = 50;
 
 class Slideshow extends Object3D {
   constructor(options) {
@@ -163,13 +164,12 @@ class Slideshow extends Object3D {
   }
 
   onScroll(e) {
-    this.delta = e.deltaY;
-    this.scroll = this.delta * SCROLL_MULTIPLIER;
+    this.scroll = e.deltaY;
     this.scrollDirection = Math.sign(this.scroll);
 
     this.distortion = lerp(
       this.distortion,
-      this.delta * DISTORTION_MULTIPLIER,
+      this.scroll * DISTORTION_MULTIPLIER,
       0.01
     );
   }
@@ -191,6 +191,11 @@ class Slideshow extends Object3D {
       Math.abs(this.distortion) > LERP_THRESHOLD
         ? lerp(this.distortion, 0, 0.05)
         : 0;
+
+    this.distortion = Math.min(
+      Math.max(this.distortion, DISTORTION_MIN),
+      DISTORTION_MAX
+    );
     this.postProcessingMesh.material.uniforms.u_distortionAmount.value = this.distortion;
   }
 
