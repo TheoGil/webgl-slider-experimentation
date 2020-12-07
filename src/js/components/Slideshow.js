@@ -149,11 +149,16 @@ class Slideshow extends Object3D {
       slide.respawn(1, this.viewportWidth, this.width);
     });
 
-    this.target.setSize(
+    this.postProcessingTarget.setSize(
+      window.innerWidth * window.devicePixelRatio,
+      window.innerHeight * window.devicePixelRatio
+    );
+    this.postProcessedTarget.setSize(
       window.innerWidth * window.devicePixelRatio,
       window.innerHeight * window.devicePixelRatio
     );
     this.postProcessingMesh.scale.set(newWidth, newHeight, 1);
+    this.postProcessedMesh.scale.set(newWidth, newHeight, 1);
   }
 
   onScroll(e) {
