@@ -51,6 +51,9 @@ class Slide extends Object3D {
         u_resOut: {
           value: [this.width, this.height],
         },
+        u_parallax: {
+          value: 0,
+        },
       },
     });
 
@@ -197,6 +200,12 @@ class Slide extends Object3D {
 
   updateTranslation(translation) {
     this.mesh.position.x += translation;
+    this.applyParallax();
+  }
+
+  applyParallax() {
+    this.mesh.material.uniforms.u_parallax.value =
+      this.mesh.position.x / (this.viewportWidth / 2);
   }
 
   respawn(direction, viewportWidth, slideshowWidth) {

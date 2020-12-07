@@ -250,6 +250,10 @@ class Slideshow extends Object3D {
         this.hasTransitionRunning = false;
         this.activeSlide = null;
       });
+
+      this.slides.forEach((slide) => {
+        slide.applyParallax();
+      });
     }
   }
 
@@ -261,6 +265,8 @@ class Slideshow extends Object3D {
         ease: "power2.out",
         duration: 1,
         onUpdate: () => {
+          mesh.parent.applyParallax();
+
           this.slides.forEach((slide) => {
             slide.respawn(
               Math.sign(mesh.position.x),
