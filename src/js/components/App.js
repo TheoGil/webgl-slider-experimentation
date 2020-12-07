@@ -10,7 +10,6 @@ import {
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
-import Stats from "stats-js";
 import Slideshow from "./Slideshow";
 import Text from "./Text";
 
@@ -80,12 +79,6 @@ class App {
     this.camera.position.z = 100;
     // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     // this.controls.enableZoom = false;
-
-    /**
-     * GUI
-     */
-    this.stats = new Stats();
-    document.body.appendChild(this.stats.dom);
 
     /**
      * Scroll handling
@@ -207,14 +200,10 @@ class App {
   render() {
     requestAnimationFrame(this.render);
 
-    this.stats.begin();
-
     this.text.update();
     this.slideshow.update();
     this.slideshow.render();
     this.renderer.render(this.scene, this.camera);
-
-    this.stats.end();
   }
 }
 
