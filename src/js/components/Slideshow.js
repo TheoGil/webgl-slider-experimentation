@@ -42,6 +42,7 @@ class Slideshow extends Object3D {
     this.scrollDirection = 0; // 1 = Moving forward | -1 = Moving backward
     this.hasTransitionRunning = false;
     this.activeSlide = null;
+    this.hoveredSlide = null;
     this.scene = new Scene();
 
     this.initSlides();

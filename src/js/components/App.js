@@ -26,6 +26,7 @@ class App {
      */
     this.onResize = this.onResize.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
     this.render = this.render.bind(this);
     // Note: virtual-scroll takes care of the context binding for the scroll events
 
@@ -43,6 +44,7 @@ class App {
      */
     window.addEventListener("resize", this.onResize, false);
     window.addEventListener("mousedown", this.onMouseDown, false);
+    window.addEventListener("mousemove", this.onMouseMove, false);
 
     /**
      * Let's go
@@ -165,24 +167,34 @@ class App {
       // If a slide is already opened and no transition is running, close active slide, no matter where user clicks
       this.slideshow.close();
     } else {
-      // If no slide is open (default state) AND no transition is running, check if mouse is intersecting a slide during click
-      if (!this.slideshow.hasTransitionRunning) {
-        this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        this.intersects.length = 0;
-        this.raycaster.intersectObjects(
-          this.slideshow.scene.children,
-          true,
-          this.intersects
-        );
-
-        // If a slide is clicked, open it
-        if (this.intersects.length > 0) {
-          this.slideshow.open(this.intersects[0].object);
-        }
+      // If user is hovering a slide AND no transition is running
+      if (this.slideshow.hoveredSlide && !this.slideshow.hasTransitionRunning) {
+        this.slideshow.open(this.slideshow.hoveredSlide);
       }
+    }
+  }
+
+  onMouseMove(e) {
+    this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.intersects.length = 0;
+    this.raycaster.intersectObjects(
+      this.slideshow.scene.children,
+      true,
+      this.intersects
+    );
+
+    this.slideshow.hoveredSlide =
+      this.intersects.length > 0
+        ? (this.hoveredSlide = this.intersects[0].object)
+        : null;
+
+    if (this.slideshow.hoveredSlide) {
+      document.body.classList.add("hovering");
+    } else {
+      document.body.classList.remove("hovering");
     }
   }
 

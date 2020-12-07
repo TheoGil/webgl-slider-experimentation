@@ -1,5 +1,9 @@
 body {
   margin: 0;
+
+  &.hovering {
+    cursor: pointer;
+  }
 }
 
 canvas {
