@@ -173,7 +173,7 @@ class App {
         this.raycaster.setFromCamera(this.mouse, this.camera);
         this.intersects.length = 0;
         this.raycaster.intersectObjects(
-          this.slideshow.children,
+          this.slideshow.scene.children,
           true,
           this.intersects
         );
