@@ -96,6 +96,9 @@ class Text extends Object3D {
       GLOBAL_Y_OFFSET * this.ratio,
       0
     );
+
+    // Set Initial rotation so text face the camera
+    this.backCylinder.rotation.y = this.frontCylinder.rotation.y = -Math.PI / 2;
   }
 
   onResize(newWidth, newHeight) {
