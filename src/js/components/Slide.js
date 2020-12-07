@@ -48,9 +48,6 @@ class Slide extends Object3D {
         u_resOut: {
           value: [this.width, this.height],
         },
-        u_debugColor: {
-          value: [0, 1, 0],
-        },
       },
     });
 
@@ -198,27 +195,14 @@ class Slide extends Object3D {
 
   respawn(direction, viewportWidth, slideshowWidth) {
     if (this.mesh.position.x + this.width / 2 < -viewportWidth / 2) {
-      this.red();
       if (direction === -1) {
         this.mesh.position.x += slideshowWidth;
       }
     } else if (this.mesh.position.x - this.width / 2 > viewportWidth / 2) {
-      this.red();
-
       if (direction === 1) {
         this.mesh.position.x -= slideshowWidth;
       }
-    } else {
-      this.green();
     }
-  }
-
-  red() {
-    this.mesh.material.uniforms.u_debugColor.value = [1, 0, 0];
-  }
-
-  green() {
-    this.mesh.material.uniforms.u_debugColor.value = [0, 1, 0];
   }
 }
 
