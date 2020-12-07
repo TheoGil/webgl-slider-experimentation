@@ -8,7 +8,6 @@ import {
   PlaneBufferGeometry,
   MeshBasicMaterial,
 } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import VirtualScroll from "virtual-scroll";
 import Slideshow from "./Slideshow";
 import Text from "./Text";
@@ -77,8 +76,6 @@ class App {
       1000
     );
     this.camera.position.z = 100;
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    // this.controls.enableZoom = false;
 
     /**
      * Scroll handling
