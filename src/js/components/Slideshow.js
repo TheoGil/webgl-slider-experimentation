@@ -167,14 +167,16 @@ class Slideshow extends Object3D {
   }
 
   onScroll({ deltaX, deltaY }) {
-    this.scroll = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
-    this.scrollDirection = Math.sign(this.scroll);
+    if (!this.activeSlide) {
+      this.scroll = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+      this.scrollDirection = Math.sign(this.scroll);
 
-    this.distortion = lerp(
-      this.distortion,
-      this.scroll * DISTORTION_MULTIPLIER,
-      0.01
-    );
+      this.distortion = lerp(
+        this.distortion,
+        this.scroll * DISTORTION_MULTIPLIER,
+        0.01
+      );
+    }
   }
 
   animateIn() {
