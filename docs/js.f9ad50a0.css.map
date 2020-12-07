@@ -1,0 +1,1 @@
+{"version":3,"sources":["scss\\styles.scss"],"names":[],"mappings":"AAAA,KACE,SAEA,cACE,eAIJ,OACE,cAAA,CACA,KAAA,CACA","file":"js.f9ad50a0.css","sourceRoot":"..\\src","sourcesContent":["body {\r\n  margin: 0;\r\n\r\n  &.hovering {\r\n    cursor: pointer;\r\n  }\r\n}\r\n\r\ncanvas {\r\n  position: fixed;\r\n  top: 0;\r\n  left: 0;\r\n}\r\n"]}
