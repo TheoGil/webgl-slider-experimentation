@@ -1,6 +1,5 @@
 import {
   Object3D,
-  TextureLoader,
   Scene,
   WebGLRenderTarget,
   RGBAFormat,
@@ -11,6 +10,7 @@ import {
 } from "three";
 import gsap from "gsap";
 import lerp from "lerp";
+import Preload from "preload-it";
 
 import Slide from "./Slide";
 import vertexShader from "../../shaders/postfx/vertex.vert";
@@ -29,13 +29,14 @@ class Slideshow extends Object3D {
   constructor(options) {
     super(options);
 
+    this.onSlidesLoaded = this.onSlidesLoaded.bind(this);
+
     this.renderer = options.renderer;
     this.camera = options.camera;
     this.viewportWidth = options.viewportWidth;
     this.viewportHeight = options.viewportHeight;
     this.ratio = Math.min(this.viewportWidth, this.viewportHeight);
     this.slides = [];
-    this.delta = 0;
     this.distortion = 0;
     this.width = 0; // Initiated at 0 but will be computed in the computeWidth method, once the slide have been initialized
     this.scrollTarget = 0;
@@ -45,16 +46,19 @@ class Slideshow extends Object3D {
     this.activeSlide = null;
     this.hoveredSlide = null;
     this.scene = new Scene();
+    this.preload = Preload();
+    this.initPostFX();
 
     this.initSlides();
     this.computeWidth();
-    this.initPostFX();
+
+    this.preload
+      .fetch(SLIDES_PARAMS.map((slide) => slide.src))
+      .then(this.onSlidesLoaded);
   }
 
   initSlides() {
     let xOff = 0;
-
-    const textureLoader = new TextureLoader();
 
     SLIDES_PARAMS.forEach(({ width, height, y, src }, i) => {
       const slide = new Slide({
@@ -63,8 +67,6 @@ class Slideshow extends Object3D {
         height: this.ratio * height,
         y: this.ratio * y,
         x: xOff,
-        src,
-        textureLoader,
         viewportWidth: this.viewportWidth,
         viewportHeight: this.viewportHeight,
       });
@@ -124,6 +126,7 @@ class Slideshow extends Object3D {
       transparent: true,
       depthTest: false,
       map: this.postProcessedTarget.texture,
+      opacity: 0,
     });
     this.postProcessedMesh = new Mesh(
       this.postProcessingGeometry,
@@ -172,6 +175,34 @@ class Slideshow extends Object3D {
       this.scroll * DISTORTION_MULTIPLIER,
       0.01
     );
+  }
+
+  animateIn() {
+    const scrollParams = {
+      deltaX: -40,
+      deltaY: 0,
+    };
+
+    gsap.to(scrollParams, {
+      deltaX: 0,
+      duration: 2.5,
+      onUpdate: () => {
+        this.onScroll(scrollParams);
+      },
+    });
+
+    gsap.to(this.postProcessedMesh.material, {
+      opacity: 1,
+      duration: 2.5,
+    });
+  }
+
+  onSlidesLoaded(items) {
+    items.forEach(({ blobUrl }, i) => {
+      this.slides[i].img.src = blobUrl;
+    });
+
+    this.animateIn();
   }
 
   update() {

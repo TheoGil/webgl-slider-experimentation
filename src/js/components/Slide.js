@@ -1,4 +1,10 @@
-import { Mesh, Object3D, PlaneBufferGeometry, ShaderMaterial } from "three";
+import {
+  Mesh,
+  Object3D,
+  PlaneBufferGeometry,
+  ShaderMaterial,
+  Texture,
+} from "three";
 import gsap from "gsap";
 import vertexShader from "../../shaders/slide/vertex.vert";
 import fragmentShader from "../../shaders/slide/fragment.frag";
@@ -11,17 +17,14 @@ class Slide extends Object3D {
   constructor(options) {
     super(options);
 
-    this.onTextureLoaded = this.onTextureLoaded.bind(this);
     this.onScaleUpdate = this.onScaleUpdate.bind(this);
+    this.onImgLoad = this.onImgLoad.bind(this);
 
+    this.viewportWidth = options.viewportWidth;
+    this.viewportHeight = options.viewportHeight;
     this.width = options.width;
     this.height = options.height;
     this.posY = options.y;
-    this.initialPosY = this.posY;
-    this.viewportWidth = options.viewportWidth;
-    this.viewportHeight = options.viewportHeight;
-    this.textureWidth = 0;
-    this.textureHeight = 0;
 
     const geometry = new PlaneBufferGeometry(
       this.width,
@@ -40,10 +43,10 @@ class Slide extends Object3D {
           value: 0,
         },
         u_texture: {
-          value: options.textureLoader.load(options.src, this.onTextureLoaded),
+          value: null,
         },
         u_resIn: {
-          value: [this.textureWidth, this.textureHeight],
+          value: [0, 0],
         },
         u_resOut: {
           value: [this.width, this.height],
@@ -55,6 +58,9 @@ class Slide extends Object3D {
     this.mesh.position.set(options.x, this.posY, 0);
     this.add(this.mesh);
 
+    this.img = document.createElement("img");
+    this.img.onload = this.onImgLoad;
+
     // We're using two timelines.
     // One for the opening and the other for the closing animation. Even if they are almost identical,
     // we're not using a single timeline with the reverse method because we need finer tuning over the easings of the tweens.
@@ -62,15 +68,6 @@ class Slide extends Object3D {
     // Using two timelines will be easier to manage and maintain.
     this.initForwardTimeLine();
     this.initBackwardTimeline();
-  }
-
-  onTextureLoaded(texture) {
-    this.textureWidth = texture.image.naturalWidth;
-    this.textureHeight = texture.image.naturalHeight;
-    this.mesh.material.uniforms.u_resIn.value = [
-      this.textureWidth,
-      this.textureHeight,
-    ];
   }
 
   initForwardTimeLine() {
@@ -172,6 +169,15 @@ class Slide extends Object3D {
       duration: 0.25,
       ease: "back.out(3)",
     });
+  }
+
+  onImgLoad() {
+    this.mesh.material.uniforms.u_texture.value = new Texture(this.img);
+    this.mesh.material.uniforms.u_resIn.value = [
+      this.img.naturalWidth,
+      this.img.naturalHeight,
+    ];
+    this.mesh.material.uniforms.u_texture.value.needsUpdate = true;
   }
 
   onScaleUpdate() {
