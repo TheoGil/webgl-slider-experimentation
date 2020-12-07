@@ -163,8 +163,8 @@ class Slideshow extends Object3D {
     this.postProcessedMesh.scale.set(newWidth, newHeight, 1);
   }
 
-  onScroll(e) {
-    this.scroll = e.deltaY;
+  onScroll({ deltaX, deltaY }) {
+    this.scroll = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
     this.scrollDirection = Math.sign(this.scroll);
 
     this.distortion = lerp(
