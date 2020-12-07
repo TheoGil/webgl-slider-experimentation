@@ -61,10 +61,11 @@ class App {
     this.renderer = new WebGLRenderer({
       canvas: document.getElementById("js-canvas"),
       antialias: false,
+      alpha: true,
       sortObjects: false,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio || 1);
-    this.renderer.setClearColor(0xffffff);
+    this.renderer.setClearColor(0xffffff, 0);
 
     /**
      * Camera

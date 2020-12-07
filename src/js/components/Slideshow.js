@@ -272,14 +272,12 @@ class Slideshow extends Object3D {
   }
 
   render() {
-    this.renderer.setClearColor(0xffffff, 0);
     this.renderer.setRenderTarget(this.postProcessingTarget);
     this.renderer.render(this.scene, this.camera);
 
     this.renderer.setRenderTarget(this.postProcessedTarget);
     this.renderer.render(this.postProcessingScene, this.camera);
 
-    this.renderer.setClearColor(0xffffff, 1);
     this.renderer.setRenderTarget(null);
   }
 }
